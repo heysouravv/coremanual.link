@@ -160,9 +160,44 @@ declare module 'astro:content' {
   render(): Render[".md"];
 }>;
 "docs": {
+"building-data-pipelines-with-airflow.md": {
+	id: "building-data-pipelines-with-airflow.md";
+  slug: "building-data-pipelines-with-airflow";
+  body: string;
+  collection: "docs";
+  data: InferEntrySchema<"docs">
+} & { render(): Render[".md"] };
+"data-quality-monitoring.md": {
+	id: "data-quality-monitoring.md";
+  slug: "data-quality-monitoring";
+  body: string;
+  collection: "docs";
+  data: InferEntrySchema<"docs">
+} & { render(): Render[".md"] };
+"data-warehousing-with-redshift.md": {
+	id: "data-warehousing-with-redshift.md";
+  slug: "data-warehousing-with-redshift";
+  body: string;
+  collection: "docs";
+  data: InferEntrySchema<"docs">
+} & { render(): Render[".md"] };
 "importing-a-mistral-model-into-amazon-bedrock.md": {
 	id: "importing-a-mistral-model-into-amazon-bedrock.md";
   slug: "importing-a-mistral-model-into-amazon-bedrock";
+  body: string;
+  collection: "docs";
+  data: InferEntrySchema<"docs">
+} & { render(): Render[".md"] };
+"lakehouse-architecture-with-delta-lake.md": {
+	id: "lakehouse-architecture-with-delta-lake.md";
+  slug: "lakehouse-architecture-with-delta-lake";
+  body: string;
+  collection: "docs";
+  data: InferEntrySchema<"docs">
+} & { render(): Render[".md"] };
+"real-time-streaming-with-kafka-kinesis.md": {
+	id: "real-time-streaming-with-kafka-kinesis.md";
+  slug: "real-time-streaming-with-kafka-kinesis";
   body: string;
   collection: "docs";
   data: InferEntrySchema<"docs">
