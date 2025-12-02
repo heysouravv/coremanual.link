@@ -14,10 +14,10 @@
     "@astrojs/mdx": "^3.0.0",
     "@astrojs/sitemap": "^3.0.0",
     "astro": "^4.0.0",
-    "markdown-it": "^14.0.0"
+    "markdown-it": "^14.0.0",
+    "mermaid": "^11.12.2"
   },
   "devDependencies": {
     "@types/markdown-it": "^14.0.0"
   }
 }
-

@@ -160,6 +160,13 @@ declare module 'astro:content' {
   render(): Render[".md"];
 }>;
 "docs": {
+"aws-zero-to-pro-data-engineering.md": {
+	id: "aws-zero-to-pro-data-engineering.md";
+  slug: "aws-zero-to-pro-data-engineering";
+  body: string;
+  collection: "docs";
+  data: InferEntrySchema<"docs">
+} & { render(): Render[".md"] };
 "building-data-pipelines-with-airflow.md": {
 	id: "building-data-pipelines-with-airflow.md";
   slug: "building-data-pipelines-with-airflow";
