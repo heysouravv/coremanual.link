@@ -11,10 +11,15 @@ export async function getStaticPaths() {
 }
 
 const { page } = Astro.props;
-const { Content } = await page.render();
+const { Content, headings } = await page.render();
 ---
 
-<BaseLayout title={`${page.data.title} - Docs`} description={page.data.description} showSidebar={true}>
+<BaseLayout 
+  title={`${page.data.title} - Docs`} 
+  description={page.data.description} 
+  showSidebar={true}
+  headings={headings}
+>
   <article>
     <h1>{page.data.title}</h1>
     {page.data.description && <p style="color: var(--text-secondary); margin-bottom: 24px;">{page.data.description}</p>}

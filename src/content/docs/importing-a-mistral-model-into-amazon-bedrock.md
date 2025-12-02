@@ -1,7 +1,7 @@
 ---
 title: Importing a Mistral Model into Amazon Bedrock
 description: How to bring our own Mistral model into Amazon Bedrock
-category: infrastructure
+category: Infrastructure
 order: 1
 ---
 

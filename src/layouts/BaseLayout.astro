@@ -5,9 +5,10 @@ interface Props {
   title: string;
   description?: string;
   showSidebar?: boolean;
+  headings?: Array<{ depth: number; slug: string; text: string }>;
 }
 
-const { title, description = "core manual for infrastructure teams", showSidebar = false } = Astro.props;
+const { title, description = "core manual for infrastructure teams", showSidebar = false, headings = [] } = Astro.props;
 
 interface SidebarItem {
   slug: string;
@@ -106,6 +107,7 @@ if (showSidebar) {
       
       html {
         scroll-behavior: smooth;
+        scroll-padding-top: 80px;
       }
       
       body {
@@ -135,9 +137,9 @@ if (showSidebar) {
       }
       
       .header-content {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 12px 24px;
+        max-width: 100%;
+        margin: 0;
+        padding: 12px 24px 12px 28px;
         display: flex;
         align-items: center;
         gap: 32px;
@@ -183,24 +185,22 @@ if (showSidebar) {
       .content-wrapper {
         display: flex;
         flex: 1;
-        max-width: 1400px;
-        margin: 0 auto;
         width: 100%;
+        position: relative;
       }
       
       .sidebar {
         width: 240px;
         background-color: var(--bg-sidebar);
         border-right: 1px solid var(--border-light);
-        padding: 24px 0;
-        position: sticky;
-        top: 57px;
-        height: calc(100vh - 57px);
-        overflow-y: auto;
         flex-shrink: 0;
       }
       
       .sidebar-nav {
+        position: sticky;
+        top: 57px;
+        max-height: calc(100vh - 57px);
+        overflow-y: auto;
         padding: 24px 16px;
       }
       
@@ -255,11 +255,93 @@ if (showSidebar) {
         font-weight: 500;
       }
       
+      .toc-sidebar {
+        width: 200px;
+        background-color: var(--bg-sidebar);
+        border-left: 1px solid var(--border-light);
+        flex-shrink: 0;
+      }
+      
+      .toc-nav {
+        position: sticky;
+        top: 57px;
+        max-height: calc(100vh - 57px);
+        overflow-y: auto;
+        padding: 24px 16px;
+      }
+      
+      .toc-title {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-tertiary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 16px;
+        padding: 0;
+        margin-top: 0;
+      }
+      
+      .toc-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      
+      .toc-list li {
+        margin: 0;
+      }
+      
+      .toc-link {
+        display: block;
+        padding: 4px 8px;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 13px;
+        border-radius: 3px;
+        transition: all 0.15s;
+        margin-bottom: 2px;
+        line-height: 1.5;
+        border-left: 2px solid transparent;
+      }
+      
+      .toc-link:hover {
+        background-color: var(--bg-secondary);
+        color: var(--link-color);
+        border-left-color: var(--link-color);
+      }
+      
+      .toc-h2 .toc-link {
+        font-weight: 500;
+        padding-left: 8px;
+        font-size: 13px;
+        margin-bottom: 4px;
+      }
+      
+      .toc-h3 .toc-link {
+        padding-left: 16px;
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+      
+      .toc-h4 .toc-link {
+        padding-left: 24px;
+        font-size: 11px;
+        color: var(--text-tertiary);
+      }
+      
+      .toc-link.active {
+        color: var(--link-color);
+        font-weight: 500;
+        border-left-color: var(--link-color);
+        background-color: var(--accent-blue-light);
+      }
+      
       main {
         flex: 1;
         padding: 32px 48px;
         max-width: 900px;
         min-width: 0;
+        margin: 0 auto;
       }
       
       main.no-sidebar {
@@ -473,11 +555,16 @@ if (showSidebar) {
       footer {
         border-top: 1px solid var(--border-light);
         padding: 24px 48px;
-        margin-top: 48px;
         text-align: center;
         color: var(--text-tertiary);
         font-size: 13px;
         background-color: var(--bg-secondary);
+      }
+      
+      @media (max-width: 1200px) {
+        .toc-sidebar {
+          display: none;
+        }
       }
       
       @media (max-width: 1024px) {
@@ -547,17 +634,66 @@ if (showSidebar) {
                   </ul>
                 </div>
               ))}
+              
             </nav>
           </aside>
         )}
         <main class={showSidebar ? '' : 'no-sidebar'}>
           <slot />
         </main>
+        {headings.length > 0 && (
+          <aside class="toc-sidebar">
+            <nav class="toc-nav">
+              <h3 class="toc-title">On this page</h3>
+              <ul class="toc-list">
+                {headings.map((heading) => {
+                  const indentClass = heading.depth === 2 ? 'toc-h2' : heading.depth === 3 ? 'toc-h3' : 'toc-h4';
+                  return (
+                    <li class={indentClass}>
+                      <a href={`#${heading.slug}`} class="toc-link">
+                        {heading.text}
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
+          </aside>
+        )}
       </div>
       <footer>
         <p>&copy; {new Date().getFullYear()} coremanual.link</p>
       </footer>
     </div>
+    {headings.length > 0 && (
+      <script>
+        // Highlight active TOC item on scroll
+        const headings = document.querySelectorAll('h2[id], h3[id], h4[id]');
+        const tocLinks = document.querySelectorAll('.toc-link');
+        
+        function updateActiveTOC() {
+          let current = '';
+          headings.forEach((heading) => {
+            const rect = heading.getBoundingClientRect();
+            if (rect.top <= 100) {
+              current = heading.id;
+            }
+          });
+          
+        tocLinks.forEach((link) => {
+          const href = link.getAttribute('href');
+          if (href === `#${current}`) {
+            link.classList.add('active');
+          } else {
+            link.classList.remove('active');
+          }
+        });
+        }
+        
+        window.addEventListener('scroll', updateActiveTOC);
+        updateActiveTOC(); // Initial call
+      </script>
+    )}
   </body>
 </html>
 
