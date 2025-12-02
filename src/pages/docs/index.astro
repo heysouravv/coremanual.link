@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const docsPages = await getCollection('docs');
+
+// Group by category
+const categoryMap = new Map<string, typeof docsPages>();
+docsPages.forEach((doc) => {
+  const category = doc.data.category || 'Other';
+  if (!categoryMap.has(category)) {
+    categoryMap.set(category, []);
+  }
+  categoryMap.get(category)!.push(doc);
+});
+
+// Sort categories and items within each category
+const categories = Array.from(categoryMap.entries())
+  .sort(([a], [b]) => a.localeCompare(b))
+  .map(([name, items]) => ({
+    name,
+    items: items.sort((a, b) => (a.data.order || 0) - (b.data.order || 0))
+  }));
+---
+
+<BaseLayout title="Documentation - coremanual.link" showSidebar={true}>
+  <article>
+    <h1>Documentation</h1>
+    <p style="color: var(--text-secondary); margin-bottom: 32px;">
+      Browse our documentation organized by category
+    </p>
+    
+    {docsPages.length === 0 ? (
+      <p>No documentation pages yet. Add markdown files to <code>src/content/docs/</code> to get started.</p>
+    ) : (
+      categories.map((category) => (
+        <div style="margin-bottom: 40px;">
+          <h2 style="margin-top: 0;">{category.name}</h2>
+          <ul class="blog-list">
+            {category.items.map((doc) => (
+              <li class="blog-item">
+                <h3 style="margin-top: 0; border: none; padding: 0; font-size: 18px;">
+                  <a href={`/docs/${doc.slug}`}>{doc.data.title}</a>
+                </h3>
+                {doc.data.description && <p style="color: var(--text-secondary); margin-bottom: 0;">{doc.data.description}</p>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))
+    )}
+  </article>
+</BaseLayout>
+

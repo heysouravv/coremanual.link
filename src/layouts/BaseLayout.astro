@@ -1,0 +1,561 @@
+---
+import { getCollection } from 'astro:content';
+
+interface Props {
+  title: string;
+  description?: string;
+  showSidebar?: boolean;
+}
+
+const { title, description = "core manual for infrastructure teams", showSidebar = false } = Astro.props;
+
+interface SidebarItem {
+  slug: string;
+  data: { title: string; category?: string; order?: number };
+}
+
+interface CategoryGroup {
+  name: string;
+  items: SidebarItem[];
+}
+
+let sidebarCategories: CategoryGroup[] = [];
+if (showSidebar) {
+  const docsPages = await getCollection('docs');
+  const sortedPages = docsPages.sort((a: any, b: any) => {
+    // First sort by category, then by order
+    const categoryA = a.data.category || 'Other';
+    const categoryB = b.data.category || 'Other';
+    if (categoryA !== categoryB) {
+      return categoryA.localeCompare(categoryB);
+    }
+    return (a.data.order || 0) - (b.data.order || 0);
+  });
+  
+  // Group by category
+  const categoryMap = new Map<string, SidebarItem[]>();
+  sortedPages.forEach((page: any) => {
+    const category = page.data.category || 'Other';
+    if (!categoryMap.has(category)) {
+      categoryMap.set(category, []);
+    }
+    categoryMap.get(category)!.push(page);
+  });
+  
+  // Convert to array
+  sidebarCategories = Array.from(categoryMap.entries()).map(([name, items]) => ({
+    name,
+    items,
+  }));
+}
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <style is:global>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      :root {
+        --bg-primary: #ffffff;
+        --bg-secondary: #fafafa;
+        --bg-sidebar: #f7f9fa;
+        --text-primary: #16191f;
+        --text-secondary: #545b64;
+        --text-tertiary: #73777f;
+        --border-color: #d1d5db;
+        --border-light: #e5e7eb;
+        --link-color: #0073bb;
+        --link-hover: #005276;
+        --code-bg: #f6f8fa;
+        --code-border: #e1e4e8;
+        --code-text: #24292e;
+        --accent-blue: #0073bb;
+        --accent-blue-light: #e6f2f8;
+      }
+      
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-primary: #0d1117;
+          --bg-secondary: #161b22;
+          --bg-sidebar: #161b22;
+          --text-primary: #c9d1d9;
+          --text-secondary: #8b949e;
+          --text-tertiary: #6e7681;
+          --border-color: #30363d;
+          --border-light: #21262d;
+          --link-color: #58a6ff;
+          --link-hover: #79c0ff;
+          --code-bg: #161b22;
+          --code-border: #30363d;
+          --code-text: #c9d1d9;
+          --accent-blue: #58a6ff;
+          --accent-blue-light: #1c2128;
+        }
+      }
+      
+      html {
+        scroll-behavior: smooth;
+      }
+      
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+        line-height: 1.6;
+        color: var(--text-primary);
+        background-color: var(--bg-primary);
+        font-size: 14px;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      
+      .container {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+      
+      header {
+        background-color: var(--bg-primary);
+        border-bottom: 1px solid var(--border-light);
+        padding: 0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      }
+      
+      .header-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 12px 24px;
+        display: flex;
+        align-items: center;
+        gap: 32px;
+      }
+      
+      .logo {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-primary);
+        text-decoration: none;
+        letter-spacing: -0.3px;
+      }
+      
+      .logo:hover {
+        color: var(--link-color);
+      }
+      
+      .nav-main {
+        display: flex;
+        gap: 24px;
+        align-items: center;
+        flex: 1;
+      }
+      
+      .nav-main a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 400;
+        padding: 6px 0;
+        transition: color 0.2s;
+      }
+      
+      .nav-main a:hover {
+        color: var(--link-color);
+      }
+      
+      .nav-main a.active {
+        color: var(--link-color);
+        font-weight: 500;
+      }
+      
+      .content-wrapper {
+        display: flex;
+        flex: 1;
+        max-width: 1400px;
+        margin: 0 auto;
+        width: 100%;
+      }
+      
+      .sidebar {
+        width: 240px;
+        background-color: var(--bg-sidebar);
+        border-right: 1px solid var(--border-light);
+        padding: 24px 0;
+        position: sticky;
+        top: 57px;
+        height: calc(100vh - 57px);
+        overflow-y: auto;
+        flex-shrink: 0;
+      }
+      
+      .sidebar-nav {
+        padding: 24px 16px;
+      }
+      
+      .sidebar-nav > div {
+        margin-bottom: 24px;
+      }
+      
+      .sidebar-nav > div:last-child {
+        margin-bottom: 0;
+      }
+      
+      .sidebar-nav h3 {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-tertiary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 12px;
+        padding: 0 12px;
+        margin-top: 0;
+      }
+      
+      .sidebar-nav ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      
+      .sidebar-nav li {
+        margin: 0;
+      }
+      
+      .sidebar-nav a {
+        display: block;
+        padding: 8px 12px;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 14px;
+        border-radius: 4px;
+        transition: all 0.15s;
+        margin-bottom: 2px;
+      }
+      
+      .sidebar-nav a:hover {
+        background-color: var(--bg-secondary);
+        color: var(--link-color);
+      }
+      
+      .sidebar-nav a.active {
+        background-color: var(--accent-blue-light);
+        color: var(--link-color);
+        font-weight: 500;
+      }
+      
+      main {
+        flex: 1;
+        padding: 32px 48px;
+        max-width: 900px;
+        min-width: 0;
+      }
+      
+      main.no-sidebar {
+        max-width: 1000px;
+        margin: 0 auto;
+        width: 100%;
+      }
+      
+      article {
+        max-width: 100%;
+      }
+      
+      h1 {
+        font-size: 32px;
+        font-weight: 600;
+        line-height: 1.25;
+        color: var(--text-primary);
+        margin-bottom: 16px;
+        margin-top: 0;
+        letter-spacing: -0.5px;
+      }
+      
+      h2 {
+        font-size: 24px;
+        font-weight: 600;
+        line-height: 1.3;
+        color: var(--text-primary);
+        margin-top: 32px;
+        margin-bottom: 16px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border-light);
+        letter-spacing: -0.3px;
+      }
+      
+      h3 {
+        font-size: 20px;
+        font-weight: 600;
+        line-height: 1.4;
+        color: var(--text-primary);
+        margin-top: 24px;
+        margin-bottom: 12px;
+      }
+      
+      h4 {
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 1.4;
+        color: var(--text-primary);
+        margin-top: 20px;
+        margin-bottom: 10px;
+      }
+      
+      h5, h6 {
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1.4;
+        color: var(--text-primary);
+        margin-top: 16px;
+        margin-bottom: 8px;
+      }
+      
+      p {
+        margin-bottom: 16px;
+        color: var(--text-primary);
+        line-height: 1.7;
+      }
+      
+      a {
+        color: var(--link-color);
+        text-decoration: none;
+      }
+      
+      a:hover {
+        color: var(--link-hover);
+        text-decoration: underline;
+      }
+      
+      code {
+        background-color: var(--code-bg);
+        color: var(--code-text);
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 13px;
+        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        border: 1px solid var(--code-border);
+      }
+      
+      pre {
+        background-color: var(--code-bg);
+        border: 1px solid var(--code-border);
+        padding: 16px;
+        border-radius: 6px;
+        overflow-x: auto;
+        margin: 16px 0;
+        line-height: 1.5;
+      }
+      
+      pre code {
+        background: none;
+        padding: 0;
+        border: none;
+        color: inherit;
+        font-size: 13px;
+      }
+      
+      ul, ol {
+        margin-left: 24px;
+        margin-bottom: 16px;
+        color: var(--text-primary);
+      }
+      
+      li {
+        margin-bottom: 8px;
+        line-height: 1.6;
+      }
+      
+      blockquote {
+        border-left: 3px solid var(--border-color);
+        padding-left: 16px;
+        margin: 16px 0;
+        color: var(--text-secondary);
+        font-style: italic;
+      }
+      
+      img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 6px;
+        margin: 16px 0;
+        border: 1px solid var(--border-light);
+      }
+      
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 16px 0;
+        border: 1px solid var(--border-light);
+      }
+      
+      th {
+        background-color: var(--bg-secondary);
+        padding: 12px;
+        text-align: left;
+        font-weight: 600;
+        border-bottom: 2px solid var(--border-color);
+        color: var(--text-primary);
+      }
+      
+      td {
+        padding: 12px;
+        border-bottom: 1px solid var(--border-light);
+        color: var(--text-primary);
+      }
+      
+      tr:last-child td {
+        border-bottom: none;
+      }
+      
+      hr {
+        border: none;
+        border-top: 1px solid var(--border-light);
+        margin: 32px 0;
+      }
+      
+      .blog-list {
+        list-style: none;
+        margin-left: 0;
+      }
+      
+      .blog-item {
+        padding: 20px;
+        border: 1px solid var(--border-light);
+        border-radius: 6px;
+        margin-bottom: 16px;
+        background-color: var(--bg-primary);
+        transition: all 0.2s;
+      }
+      
+      .blog-item:hover {
+        border-color: var(--border-color);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+      
+      .blog-item h2 {
+        margin-top: 0;
+        margin-bottom: 8px;
+        border: none;
+        padding: 0;
+      }
+      
+      .blog-item h2 a {
+        color: var(--text-primary);
+      }
+      
+      .blog-item h2 a:hover {
+        color: var(--link-color);
+      }
+      
+      .blog-meta {
+        color: var(--text-tertiary);
+        font-size: 13px;
+        margin-bottom: 12px;
+      }
+      
+      .blog-meta time {
+        color: var(--text-secondary);
+      }
+      
+      footer {
+        border-top: 1px solid var(--border-light);
+        padding: 24px 48px;
+        margin-top: 48px;
+        text-align: center;
+        color: var(--text-tertiary);
+        font-size: 13px;
+        background-color: var(--bg-secondary);
+      }
+      
+      @media (max-width: 1024px) {
+        .sidebar {
+          display: none;
+        }
+        
+        main {
+          padding: 24px;
+        }
+      }
+      
+      @media (max-width: 768px) {
+        .header-content {
+          padding: 12px 16px;
+          gap: 16px;
+        }
+        
+        .nav-main {
+          gap: 16px;
+        }
+        
+        main {
+          padding: 20px 16px;
+        }
+        
+        h1 {
+          font-size: 28px;
+        }
+        
+        h2 {
+          font-size: 22px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="header-content">
+          <a href="/docs" class="logo">coremanual</a>
+          <nav class="nav-main">
+            <a href="/docs" class={Astro.url.pathname.startsWith('/docs') ? 'active' : ''}>Documentation</a>
+          </nav>
+        </div>
+      </header>
+      <div class="content-wrapper">
+        {showSidebar && sidebarCategories.length > 0 && (
+          <aside class="sidebar">
+            <nav class="sidebar-nav">
+              {sidebarCategories.map((category) => (
+                <div>
+                  <h3>{category.name}</h3>
+                  <ul>
+                    {category.items.map((item: any) => {
+                      const currentPath = Astro.url.pathname;
+                      const itemPath = `/docs/${item.slug}`;
+                      const isActive = currentPath === itemPath || currentPath.startsWith(itemPath + '/');
+                      return (
+                        <li>
+                          <a href={itemPath} class={isActive ? 'active' : ''}>
+                            {item.data.title}
+                          </a>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ))}
+            </nav>
+          </aside>
+        )}
+        <main class={showSidebar ? '' : 'no-sidebar'}>
+          <slot />
+        </main>
+      </div>
+      <footer>
+        <p>&copy; {new Date().getFullYear()} coremanual.link</p>
+      </footer>
+    </div>
+  </body>
+</html>
+

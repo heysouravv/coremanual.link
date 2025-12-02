@@ -1,0 +1,23 @@
+{
+  "name": "coremanual-link",
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "setup": "node setup-links.js"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^3.0.0",
+    "@astrojs/sitemap": "^3.0.0",
+    "astro": "^4.0.0",
+    "markdown-it": "^14.0.0"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "^14.0.0"
+  }
+}
+
